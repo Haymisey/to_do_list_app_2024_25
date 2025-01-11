@@ -1,0 +1,12 @@
+body {
+      background-color: lemonchiffon;
+    }
+.btn-lemon {
+      background-color: #f9e79f;
+      color: black;
+      border: 1px solid #f7dc6f;
+    }
+.btn-lemon:hover {
+      background-color: #f7dc6f;
+      color: black;
+    }
