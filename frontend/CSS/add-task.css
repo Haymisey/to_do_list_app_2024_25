@@ -3,19 +3,16 @@
     margin: 0 auto;
     text-align: center;
 }
-
 .input-container {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
 }
-
 #new-task {
     flex: 1;
     padding: 10px;
     font-size: 16px;
 }
-
 #add-task {
     padding: 10px 20px;
     font-size: 16px;
@@ -25,12 +22,10 @@
     border: none;
     color: white;
 }
-
 ul {
     list-style-type: none;
     padding: 0;
 }
-
 li {
     display: flex;
     justify-content: space-between;
@@ -43,20 +38,15 @@ li {
     text-align: left;
     column-gap: 3px;
 }
-
-
 button {
     margin-left: 10px;
 }
 .navbar-nav .nav-link {
 text-decoration: none !important;
-
 }
-
 .navbar-toggler {
 text-decoration: none !important;
 }
-
 .nav-item{
     padding: 0;
     border: none;
