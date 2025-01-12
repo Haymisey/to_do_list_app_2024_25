@@ -1,11 +1,6 @@
-
-  
   .navbar {
     margin-bottom: 30px;
   }
-  
- 
-  
   .container {
     background-color: #ffffff;
     border-radius: 15px;
@@ -14,20 +9,17 @@
     max-width: 900px;
     margin: 0 auto;
   }
-  
   .calendar .row {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
   }
-  
   .calendar .col.text-center {
     font-weight: bold;
     background-color: #f0f0f0;
     padding: 10px;
     border-radius: 5px;
   }
-  
   #calendar-days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -35,7 +27,6 @@
     justify-items: center;
     margin-top: 10px;
   }
-  
   #calendar-days .col {
     height: 60px;
     line-height: 60px;
@@ -45,17 +36,14 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
-  
   #calendar-days .col:hover {
     background-color: #e0e0e0;
   }
-  
   #calendar-days .empty {
     background-color: #f8f9fa;
     cursor: default;
     border: none;
   }
-  
   button {
     padding: 10px 25px;
     border-radius: 8px;
@@ -66,11 +54,9 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
-  
   button:hover {
     background-color: #0056b3;
   }
-  
   #month-year {
     font-size: 24px;
     font-weight: bold;
