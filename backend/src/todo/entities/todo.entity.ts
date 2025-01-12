@@ -1,6 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../../user/entities/user.entity'; // Import User entity
 
-@Entity()
+@Entity('todos') // Add table name for clarity
 export class Todo {
   @PrimaryGeneratedColumn()
   id: number;
@@ -8,15 +15,14 @@ export class Todo {
   @Column()
   title: string;
 
-  @Column({ nullable: true }) 
+  @Column({ nullable: true })
   description: string;
 
   @Column({ default: false })
   completed: boolean;
 
   @Column()
-  userId: number; 
-
-  @Column({ type: 'date', nullable: true }) 
-  dueDate: string;
+  userId: number; // The userId will be stored as a foreign key in the database
+  @Column({ type: 'date', nullable: true }) // Add the dueDate field to store the date
+  dueDate: string; // You can use Date if you want to store full Date objects, or 'string' for simple date strings
 }

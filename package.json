@@ -6,8 +6,7 @@
     "passport-jwt": "^4.0.1"
   },
   "devDependencies": {
-    "@types/passport-jwt": "^4.0.1"
+    "@types/passport-jwt": "^4.0.1",
+    "typescript": "^5.7.3"
   }
-
-
 }

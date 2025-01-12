@@ -1,152 +1,187 @@
-document.getElementById("add-task").addEventListener("click", addTask);
-document.getElementById("new-task").addEventListener("keypress", function (event) {
-  if (event.key === "Enter") {
-    addTask();
-  }
-});
-
-document.addEventListener("DOMContentLoaded", loadTasks);
-
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var _a;
+function showMessagee(message, type) {
+    const messageElement = document.getElementById("message");
+    messageElement.textContent = message;
+    messageElement.className = `alert alert-${type}`;
+    messageElement.style.display = "block";
+}
+function fetchTasks() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = localStorage.getItem("access_token");
+        console.log("Access Token:", token);
+        if (!token) {
+            showMessagee("No access token found. Please log in.", "danger");
+            return;
+        }
+        try {
+            const response = yield fetch("http://localhost:3001/todos", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            console.log(response);
+            if (!response.ok) {
+                throw new Error("Failed to fetch tasks");
+            }
+            const tasks = yield response.json();
+            const taskList = document.getElementById("task-list");
+            taskList.innerHTML = "";
+            tasks.forEach((task) => {
+                const listItem = document.createElement("li");
+                listItem.className =
+                    "list-group-item d-flex justify-content-between align-items-center";
+                listItem.textContent = task.title;
+                // Create button container
+                const buttonContainer = document.createElement("div");
+                buttonContainer.className = "btn-group";
+                // Edit button
+                const editButton = document.createElement("button");
+                editButton.className = "btn btn-warning btn-sm";
+                editButton.innerHTML = "✏️"; // Pencil icon
+                editButton.onclick = () => editTask(task, editButton);
+                buttonContainer.appendChild(editButton);
+                // Delete button
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "btn btn-danger btn-sm";
+                deleteButton.innerHTML = "🗑️"; // Trash icon
+                deleteButton.onclick = () => deleteTask(task.id, listItem);
+                buttonContainer.appendChild(deleteButton);
+                // Append the button container to the list item
+                listItem.appendChild(buttonContainer);
+                // Append the list item to the task list
+                taskList.appendChild(listItem);
+            });
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                showMessagee(error.message, "danger");
+            }
+            else {
+                showMessagee("An unknown error occurred", "danger");
+            }
+        }
+    });
+}
 function addTask() {
-  const taskInput = document.getElementById("new-task");
-  const dueDateInput = document.getElementById("due-date");
-  const taskText = taskInput.value.trim();
-  const dueDate = dueDateInput.value;
-
-  if (taskText === "") {
-    alert("Please enter a task.");
-    return;
-  }
-
-  const taskList = document.getElementById("task-list");
-  const li = document.createElement("li");
-  li.className = "list-group-item d-flex justify-content-between align-items-center";
-
-  const taskContent = document.createElement("span");
-  taskContent.textContent = taskText + (dueDate ? ` (Due: ${dueDate})` : "");
-  li.appendChild(taskContent);
-
-  const buttonContainer = document.createElement("div");
-  buttonContainer.style.display = "flex";
-  buttonContainer.style.gap = "5px";
-
-  const editButton = document.createElement("button");
-  editButton.className = "btn btn-warning btn-sm";
-  editButton.innerHTML = "✏️"; // Pencil icon
-  editButton.onclick = () => editTask(taskContent, editButton);
-  buttonContainer.appendChild(editButton);
-
-  const deleteButton = document.createElement("button");
-  deleteButton.className = "btn btn-danger btn-sm";
-  deleteButton.innerHTML = "🗑️"; // Trash icon
-  deleteButton.onclick = () => deleteTask(li);
-  buttonContainer.appendChild(deleteButton);
-
-  li.appendChild(buttonContainer);
-  taskList.appendChild(li);
-
-  saveTaskToLocalStorage(taskText, dueDate);
-
-  taskInput.value = "";
-  dueDateInput.value = "";
-
-  if (dueDate && isToday(new Date(dueDate))) {
-    alert(`Reminder: The task "${taskText}" is due today!`);
-  }
+    return __awaiter(this, void 0, void 0, function* () {
+        const title = document.getElementById("new-task").value;
+        const dueDate = document.getElementById("due-date")
+            .value;
+        const token = localStorage.getItem("access_token");
+        if (!title || !dueDate) {
+            showMessagee("Please provide a title and due date for the task.", "warning");
+            return;
+        }
+        if (!token) {
+            showMessagee("No access token found. Please log in.", "danger");
+            return;
+        }
+        const newTask = {
+            title: title,
+            dueDate: dueDate,
+        };
+        try {
+            const response = yield fetch("http://localhost:3001/todos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(newTask),
+            });
+            if (!response.ok) {
+                throw new Error("Failed to add task");
+            }
+            const task = yield response.json();
+            showMessagee("Task added successfully!", "success");
+            fetchTasks(); // Re-fetch tasks after adding a new one
+            document.getElementById("new-task").value = "";
+            document.getElementById("due-date").value = "";
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                showMessagee(error.message, "danger");
+            }
+            else {
+                showMessagee("An unknown error occurred", "danger");
+            }
+        }
+    });
 }
-
-function saveTaskToLocalStorage(task, dueDate) {
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  tasks.push({ task, dueDate });
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+function editTask(task, editButton) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const newTitle = prompt("Edit the task title:", task.title);
+        if (!newTitle || newTitle === task.title)
+            return;
+        try {
+            const token = localStorage.getItem("access_token");
+            const response = yield fetch(`http://localhost:3001/todos/${task.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title: newTitle, dueDate: task.dueDate }),
+            });
+            if (!response.ok) {
+                throw new Error("Failed to update task");
+            }
+            task.title = newTitle; // Update the task in the DOM
+            showMessagee("Task updated successfully!", "success");
+            fetchTasks(); // Re-fetch tasks to show updated title
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                showMessagee(error.message, "danger");
+            }
+            else {
+                showMessagee("An unknown error occurred", "danger");
+            }
+        }
+    });
 }
-
-function loadTasks() {
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  const taskList = document.getElementById("task-list");
-  taskList.innerHTML = "";
-
-  tasks.forEach(({ task, dueDate }) => {
-    const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between align-items-center";
-
-    const taskContent = document.createElement("span");
-    taskContent.textContent = task + (dueDate ? ` (Due: ${dueDate})` : "");
-    li.appendChild(taskContent);
-
-    const buttonContainer = document.createElement("div");
-    buttonContainer.style.display = "flex";
-    buttonContainer.style.gap = "5px";
-
-    const editButton = document.createElement("button");
-    editButton.className = "btn btn-warning btn-sm";
-    editButton.innerHTML = "✏️"; // Pencil icon
-    editButton.onclick = () => editTask(taskContent, editButton);
-    buttonContainer.appendChild(editButton);
-
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "btn btn-danger btn-sm";
-    deleteButton.innerHTML = "🗑️"; // Trash icon
-    deleteButton.onclick = () => deleteTask(li);
-    buttonContainer.appendChild(deleteButton);
-
-    li.appendChild(buttonContainer);
-    taskList.appendChild(li);
-  });
+function deleteTask(taskId, listItem) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const token = localStorage.getItem("access_token");
+            const response = yield fetch(`http://localhost:3001/todos/${taskId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error("Failed to delete task");
+            }
+            listItem.remove(); // Remove the task from the DOM
+            showMessagee("Task deleted successfully!", "success");
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                showMessagee(error.message, "danger");
+            }
+            else {
+                showMessagee("An unknown error occurred", "danger");
+            }
+        }
+    });
 }
-
-function editTask(taskContent, editButton) {
-  const originalTask = taskContent.textContent.split(" (Due")[0];
-  const inputField = document.createElement("input");
-  inputField.type = "text";
-  inputField.value = originalTask;
-  taskContent.textContent = "";
-  taskContent.appendChild(inputField);
-
-  editButton.innerHTML = "💾"; // Save icon
-  editButton.onclick = () => saveEditedTask(inputField, taskContent, editButton, originalTask);
-  inputField.addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-      saveEditedTask(inputField, taskContent, editButton, originalTask);
-    }
-  });
-}
-
-function saveEditedTask(inputField, taskContent, editButton, originalTask) {
-  const newTaskText = inputField.value.trim();
-  if (newTaskText === "") {
-    alert("Task name cannot be empty.");
-    return;
-  }
-
-  taskContent.textContent = newTaskText;
-
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  const taskIndex = tasks.findIndex((task) => task.task === originalTask);
-  if (taskIndex > -1) {
-    tasks[taskIndex].task = newTaskText;
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }
-
-  editButton.innerHTML = "✏️"; // Pencil icon
-  editButton.onclick = () => editTask(taskContent, editButton);
-}
-
-function deleteTask(taskItem) {
-  const taskList = document.getElementById("task-list");
-  const taskText = taskItem.querySelector("span").textContent.split(" (Due")[0];
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  const updatedTasks = tasks.filter((task) => task.task !== taskText);
-
-  localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-  taskList.removeChild(taskItem);
-}
-
-function isToday(date) {
-  const today = new Date();
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  );
-}
+// Event listeners
+(_a = document.getElementById("add-task")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", addTask);
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Page is loaded, fetching tasks...");
+    fetchTasks();
+});
